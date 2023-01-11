@@ -23,7 +23,6 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <thread>
 #include <vector>
 //#include <pthread.h>//for cpu affinity, Linux only
