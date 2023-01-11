@@ -19,7 +19,7 @@ def init():
     return model
 
 
-def process_video(handle=None, input_video=None, **kwargs):
+def process_video(handle=None, input_video:str=None, **kwargs):
     output_dir='./outputdir'
     output_file_name='output.mp4'
     #每获取1帧要跳过几帧
