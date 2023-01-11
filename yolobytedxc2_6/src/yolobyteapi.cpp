@@ -52,7 +52,7 @@ YoloByteAPI::~YoloByteAPI() {
         t_res.join();
 }
 
-void YoloByteAPI::drawResultForModel(const cv::Mat &org_img, const vector<STrack> &output_stracks, const string &output_image_path) const {
+void YoloByteAPI::drawResult(const cv::Mat &org_img, const vector<STrack> &output_stracks, const string &output_image_path) const {
     cv::Mat src_img = org_img.clone();
     for (const STrack &d : output_stracks) {
         const vector<float> &tlwh = d.tlwh;
@@ -63,82 +63,24 @@ void YoloByteAPI::drawResultForModel(const cv::Mat &org_img, const vector<STrack
     cout << "write image to " << output_image_path << endl;
 }
 
-bool YoloByteAPI::check_crash(const int &px, const int &py, const vector<pair<int, int>> &polygon) {
-    bool is_in = false;
-    int l = polygon.size(), next_i = 0, x1 = 0, y1 = 0, x2 = 0, y2 = 0, x = 0;
-    for (int i = 0; i < l; i++) {
-        next_i = (i + 1) % l;
-        x1 = polygon[i].first;
-        y1 = polygon[i].second;
-        x2 = polygon[next_i].first;
-        y2 = polygon[next_i].second;
-        if (((x1 == px) && (y1 == py)) || ((x2 == px) && (y2 == py))) {  // if point is on vertex
-            is_in = true;
-            break;
-        }
-        if (min(y1, y2) < py && py < max(y1, y2)) {  // find horizontal edges of polygon
-            x = x1 + (py - y1) * (x2 - x1) / (y2 - y1);
-            if (x == px) {  // if point is on edge
-                is_in = true;
-                break;
-            } else if (x > px) {  // if point is on right side of edge
-                is_in = !is_in;
-            }
-        }
-    }
-    return is_in;
-}
-
-bool YoloByteAPI::check_crash(const int &px, const int &py, const vector<int> &polygon) {
-    bool is_in = false;
-    int l = polygon.size(), next_i = 0, x1 = 0, y1 = 0, x2 = 0, y2 = 0, x = 0;
-    for (int i = 0; i < l; i += 2) {
-        next_i = (i + 2) % l;
-        x1 = polygon[i];
-        y1 = polygon[(i + 1) % l];
-        x2 = polygon[next_i];
-        y2 = polygon[(next_i + 1) % l];
-        if (((x1 == px) && (y1 == py)) || ((x2 == px) && (y2 == py))) {  // if point is on vertex
-            is_in = true;
-            break;
-        }
-        if (min(y1, y2) < py && py < max(y1, y2)) {  // find horizontal edges of polygon
-            x = x1 + (py - y1) * (x2 - x1) / (y2 - y1);
-            if (x == px) {  // if point is on edge
-                is_in = true;
-                break;
-            } else if (x > px) {  // if point is on right side of edge
-                is_in = !is_in;
-            }
-        }
-    }
-    return is_in;
-}
-
-int YoloByteAPI::detectImageDirForAlgorithmFast(const char *video_path, const char *polygon_str, const int &frame_count_thresh, int skip_num) {
+int YoloByteAPI::processVideo(const char *video_path, const char *output_dir, const char *output_file_name = "output.mp4", int skip_num = 1) {
     read_end = false, detect_end = false, track_end = false, res_end = false;
-    this->frame_count_thresh = const_cast<int &>(frame_count_thresh);
-
-    cv::VideoCapture video_cap(video_path);
-    int i = 0, width = video_cap.get(cv::CAP_PROP_FRAME_WIDTH), height = video_cap.get(cv::CAP_PROP_FRAME_HEIGHT);
-    record_id.clear();
-    algorithm_data.clear();
-    polygon.clear();
-    string reg = "\\d+(\\.\\d+)?", polygon_string = polygon_str;
-    regex Pattern(reg);
-    smatch result;
-    string::const_iterator iterStart = polygon_string.begin();
-    string::const_iterator iterEnd = polygon_string.end();
-    while (regex_search(iterStart, iterEnd, result, Pattern)) {
-        if (i & 1) {                                                      // 奇数
-            polygon.emplace_back((int)(stof(result[0].str()) * height));  // y
-        } else {
-            polygon.emplace_back((int)(stof(result[0].str()) * width));  // x
-        }
-        ++i;
-        // polygon.emplace_back(result[0]*width);
-        iterStart = result[0].second;  // 更新搜索起�?�位�??,搜索剩下的字符串
+    if (_access(video_path, 0) == -1) {
+        cout << "video file not exist" << endl;
+        return -1;
     }
+    if (_access(output_dir, 0) == -1) {
+        cout << "output dir not exist" << endl;
+        return -1;
+    }
+    this->output_dir = output_dir;
+    if (isalpha(this->output_dir.back()) || isdigit(this->output_dir.back()))
+        this->output_dir += '/';
+    cv::VideoCapture video_cap(video_path);
+    int width = video_cap.get(cv::CAP_PROP_FRAME_WIDTH), height = video_cap.get(cv::CAP_PROP_FRAME_HEIGHT), fps = video_cap.get(CAP_PROP_FPS);
+    ;
+    // VideoWriter videoWriter(output_dir+"output.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), double(fps)/double(1+skip_num), Size(width, height));
+    this->videoWriter.open(output_dir + output_file_name, VideoWriter::fourcc('m', 'p', '4', 'v'), double(fps) / double(1 + skip_num), Size(width, height));
 
     cv::Mat src_img;
     while (video_cap.read(src_img)) {
@@ -146,13 +88,15 @@ int YoloByteAPI::detectImageDirForAlgorithmFast(const char *video_path, const ch
             if (!video_cap.read(src_img))
                 break;
         }
-        // unique_lock<mutex> lck(mtx_frames);
         mtx_frames.lock();
         frames_queue.push_back(src_img);
         mtx_frames.unlock();
-        // lck.unlock();
+        mtx_frames_res.lock();
+        frames_queue_res.push_back(src_img);  // for video output
+        mtx_frames_res.unlock();
         cv_frames.notify_one();
     }
+    video_cap.release();
     read_end = true;
     cv_frames.notify_all();
 
@@ -160,10 +104,10 @@ int YoloByteAPI::detectImageDirForAlgorithmFast(const char *video_path, const ch
     // cout<<"cv_res.wait(lck, [&] { return res_end; });"<<endl;
     cv_res.wait(lck, [&] { return res_end; });
     // cout<<"out wake up ed"<<endl;
-    int res = algorithm_data.size();
+    cout<<"finish process video: "<<video_path<<endl;
     res_end = false;
     lck.unlock();
-    return res;
+    return 0;
 }
 
 void YoloByteAPI::detect() {
@@ -199,13 +143,12 @@ void YoloByteAPI::detect() {
         mtx_dets.lock();
         yolov5_trt_detect(trt_engine, src_img, conf_thresh, dets, nms_thresh);
         lck.unlock();
-        /*FILE *fp = fopen("/project/ev_sdk/src/testdet.txt", "a");
+        /*//for debug
+        FILE *fp = fopen("testdet.txt", "a");
         for(DetectRes& d:dets){
             fprintf(fp, "%d,%d,%d,%d,%d,%f\n",d.track_id, d.tx, d.ty, d.w, d.h, d.confidence);
         }
         fclose(fp);*/
-        // unique_lock<mutex> lck2(mtx_dets);
-
         dets_queue.emplace_back(dets);
         mtx_dets.unlock();
         cv_detect.notify_one();
@@ -242,14 +185,13 @@ void YoloByteAPI::track() {
         }
         output_stracks = tracker->update(dets_queue.front());
         dets_queue.pop_front();
-
-        /*FILE *fp = fopen("/project/ev_sdk/src/testtrack.txt", "a");
+        /*//for debug
+        FILE *fp = fopen("testtrack.txt", "a");
         for(STrack& d:output_stracks){
             const vector<float> &tlwh = d.tlwh;
             fprintf(fp, "%d,%d,%d,%d,%d,%f\n",int(d.track_id), max(int(tlwh[0]), 0), max(int(tlwh[1]), 0), int(tlwh[2]), int(tlwh[3]), d.score);
         }
         fclose(fp);*/
-        // unique_lock<mutex> lck2(mtx_tracks);
         mtx_tracks.lock();
         stracks_queue.emplace_back(output_stracks);
         lck.unlock();
@@ -270,7 +212,7 @@ void YoloByteAPI::res() {
     if (rc != 0) {
       std::cerr << "Error calling pthread_setaffinity_np: " << rc << "\n";
     }*/
-    set<int> interrupt_ids;
+    cv::Mat src_img;
     while (!end) {
         unique_lock<mutex> lck(mtx_tracks);
         if (!track_end)
@@ -283,39 +225,26 @@ void YoloByteAPI::res() {
             lck.unlock();
             track_end = false;
             res_end = true;
-            record_id.clear();
             cv_res.notify_all();
             delete tracker;
             tracker = new BYTETracker(frame_rate, track_buffer, track_thresh, high_thresh, match_thresh);
+            this->videoWriter.release();
             continue;
         }
         vector<STrack> output_stracks = stracks_queue.front();
         stracks_queue.pop_front();
+        mtx_frames_res.lock();
+        cv::Mat src_img = frames_queue_res.front().clone();
+        frames_queue_res.pop_front();
 
-        for (const auto &it : record_id) {
-            interrupt_ids.emplace(it.first);  // it.first is the key
-        }
         for (const STrack &d : output_stracks) {
             const vector<float> &tlwh = d.tlwh;
-            int track_id = d.track_id;
-            if (check_crash(tlwh[0] + tlwh[2] / 2, tlwh[1] + tlwh[3] / 2, polygon)) {
-                if (record_id.find(track_id) == record_id.end()) {  // not found
-                    record_id[track_id] = 1;
-                } else {  // found
-                    ++record_id[track_id];
-                    interrupt_ids.erase(track_id);
-                }
-            }
+            cv::rectangle(src_img, cv::Rect2f(tlwh[0], tlwh[1], tlwh[2], tlwh[3]), cv::Scalar(0, 255, 0), 2);
+            cv::putText(src_img, to_string(d.track_id), cv::Point2f(tlwh[0], tlwh[1]), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar(0, 255, 0), 2);
         }
+        this->videoWriter.write(src_img);
+
+        mtx_frames_res.unlock();
         lck.unlock();
-        for (const auto &it : interrupt_ids) {
-            record_id.erase(it);
-        }
-        for (const auto &it : record_id) {
-            if (it.second >= frame_count_thresh) {
-                algorithm_data.emplace(it.first);  // it.first is the key witch means person_id
-            }
-        }
-        interrupt_ids.clear();
     }
 }
