@@ -1,8 +1,8 @@
 echo -e "\nAttention! This is only design for online coding evnerviment.\n"
 echo -e "\nIf you want to use it in local, please change the path in this file.\n"
 
-model_dir=/project/ev_sdk/src/cppmodels/
-src_dir=/project/ev_sdk/src/
+model_dir=/content/YOLOv5_ByteTrack_Multithreading_TensorRT/cppmodels/
+src_dir=/content/YOLOv5_ByteTrack_Multithreading_TensorRT/
 #最后面的斜杠不能少
 
 model_type=m6
