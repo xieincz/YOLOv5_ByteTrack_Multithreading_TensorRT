@@ -30,7 +30,7 @@ cd opencv-4.1.2 && rm -rf build && mkdir build && cd build
 
 cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH=/home/opencv_contrib -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3 -D BUILD_opencv_python3=OFF -D BUILD_opencv_python2=OFF -D PYTHON3_EXCUTABLE=/usr/bin/python3 -D WITH_CUDA=OFF -D OPENCV_GENERATE_PKGCONFIG=ON ..
 
-make -j8
+make
 
 sudo make install
 
@@ -39,6 +39,10 @@ pkg-config --modversion opencv4
 echo "install TensorRT 7.2.2.3 on home"
 sudo apt update
 sudo apt install -y nano
+
+#wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-nvrtc-11-1_11.1.105-1_amd64.deb
+#sudo dpkg -i cuda-nvrtc-11-1_11.1.105-1_amd64.deb
+#sudo ln -s /usr/local/cuda-11.1/targets/x86_64-linux/lib/libnvrtc.so.11.1 /usr/local/cuda/lib64/libnvrtc.so.11.1
 
 cd /home
 echo "be careful! The package installed here is only applicable to Ubuntu 18.04 cuda 11.1 & 11.2"
@@ -51,14 +55,16 @@ tar -xzvf TensorRT7.2.2.3Ubuntu1804cuda11.1cudnn8.0.tar.gz
 sudo echo -e "\nexport TENSORRT_ROOT=/home/TensorRT-7.2.2.3\n
 export LD_LIBRARY_PATH=/home/TensorRT-7.2.2.3/lib:$LD_LIBRARY_PATH\n
 export CUDA_INSTALL_DIR=/usr/local/cuda-11\n
-export CUDNN_INSTALL_DIR=/usr/local/cuda-11" >> ~/.bashrc
+export CUDNN_INSTALL_DIR=/usr/local/cuda-11\n
+export LD_LIBRARY_PATH=/usr/local/cuda-11.1/targets/x86_64-linux/lib:$LD_LIBARARY_PATH" >> ~/.bashrc
 
 source ~/.bashrc
 
 sudo echo -e "\nexport TENSORRT_ROOT=/home/TensorRT-7.2.2.3\n
 export LD_LIBRARY_PATH=/home/TensorRT-7.2.2.3/lib:$LD_LIBRARY_PATH\n
 export CUDA_INSTALL_DIR=/usr/local/cuda-11\n
-export CUDNN_INSTALL_DIR=/usr/local/cuda-11" >> /etc/profile
+export CUDNN_INSTALL_DIR=/usr/local/cuda-11\n
+export LD_LIBRARY_PATH=/usr/local/cuda-11.1/targets/x86_64-linux/lib:$LD_LIBARARY_PATH" >> /etc/profile
 
 source /etc/profile
 
@@ -80,7 +86,7 @@ rm -rf build
 mkdir build
 cd build
 cmake ..
-make -j8
+make
 cd ..
 cd ..
 
@@ -89,4 +95,4 @@ cmake ./ \
 -DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
 -DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
 
-make -j8
+make 
