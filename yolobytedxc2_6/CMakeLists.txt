@@ -1,4 +1,3 @@
-# cmake_minimum_required(VERSION 2.6)
 cmake_minimum_required(VERSION 3.13)
 project(yolobyte)
 list(APPEND CUDA_NVCC_FLAGS "-std=c++11")
@@ -60,8 +59,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Ofast -Wfatal-errors -
 # 生成链接库.so文件
 cuda_add_library(yolov5_trt SHARED ${PROJECT_SOURCE_DIR}/include/yololayer.cu ${PROJECT_SOURCE_DIR}/src/yolov5_lib.cpp)
 target_link_libraries(yolov5_trt ${CUDA_LIBS} ${OpenCV_LIBS} nvonnxparser nvinfer cudart )
-
-
 
 
 set(CMAKE_CXX_FLAGS "-std=c++0x")
