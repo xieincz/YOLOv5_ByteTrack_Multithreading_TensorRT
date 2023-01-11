@@ -50,14 +50,43 @@ tar -xzvf TensorRT7.2.2.3Ubuntu1804cuda11.1cudnn8.0.tar.gz
 
 sudo echo -e "\nexport TENSORRT_ROOT=/home/TensorRT-7.2.2.3\n
 export LD_LIBRARY_PATH=/home/TensorRT-7.2.2.3/lib:$LD_LIBRARY_PATH\n
-export CUDA_INSTALL_DIR=/usr/local/cuda-11.1\n
-export CUDNN_INSTALL_DIR=/usr/local/cuda-11.1" >> ~/.bashrc
+export CUDA_INSTALL_DIR=/usr/local/cuda-11\n
+export CUDNN_INSTALL_DIR=/usr/local/cuda-11" >> ~/.bashrc
 
 source ~/.bashrc
 
 sudo echo -e "\nexport TENSORRT_ROOT=/home/TensorRT-7.2.2.3\n
 export LD_LIBRARY_PATH=/home/TensorRT-7.2.2.3/lib:$LD_LIBRARY_PATH\n
-export CUDA_INSTALL_DIR=/usr/local/cuda-11.1\n
-export CUDNN_INSTALL_DIR=/usr/local/cuda-11.1" >> /etc/profile
+export CUDA_INSTALL_DIR=/usr/local/cuda-11\n
+export CUDNN_INSTALL_DIR=/usr/local/cuda-11" >> /etc/profile
 
 source /etc/profile
+
+cd /home/TensorRT-7.2.2.3/python/
+sudo pip3 install tensorrt-7.2.2.3-cp38-none-linux_x86_64.whl
+cd ..
+pip install uff/uff-0.6.9-py2.py3-none-any.whl
+pip install graphsurgeon/graphsurgeon-0.4.5-py2.py3-none-any.whl
+
+echo "install other packages"
+sudo apt update
+sudo apt-get install -y libeigen3-dev swig
+
+echo "Compile the code of this project"
+cd /content/YOLOv5_ByteTrack_Multithreading_TensorRT
+
+cd yolov5_cpp_6
+rm -rf build
+mkdir build
+cd build
+cmake ..
+make -j8
+cd ..
+cd ..
+
+cd yolobytedxc2_6
+cmake ./ \
+-DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
+-DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+
+make -j8
