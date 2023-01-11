@@ -1,9 +1,9 @@
 from yolobytedxc2_6 import yolobyteapi
-
+import os
 
 def init():
     # for yolo
-    yolo_engine_path = './cppmodels/yolov5m6.engine'
+    yolo_engine_path = '/content/YOLOv5_ByteTrack_Multithreading_TensorRT/cppmodels/yolov5m6.engine'
     
     conf_thresh = 0.5
     nms_thresh = 0.52
@@ -20,12 +20,15 @@ def init():
 
 
 def process_video(handle=None, input_video:str=None, **kwargs):
-    output_dir='./outputdir'
+    output_dir='/content/outputdir'
     output_file_name='output.mp4'
     #每获取1帧要跳过几帧
     skip_num=1
 
     model = handle
+    if os.path.exists(output_dir):
+        os.system('rm -rf %s'%output_dir)
+    os.mkdir(output_dir)
     res = model.processVideo(input_video,output_dir,output_file_name,int(skip_num))
 
     return res
@@ -33,7 +36,7 @@ def process_video(handle=None, input_video:str=None, **kwargs):
 
 if __name__ == '__main__':
 
-    p = "./testdata/person_street.mp4"
+    p = "/content/YOLOv5_ByteTrack_Multithreading_TensorRT/testdata/person_street.mp4"
     
     import os
     assert os.path.exists(p)#整理代码的时候加的，还没有跑过，如果确定这个mp4存在可以注释本行

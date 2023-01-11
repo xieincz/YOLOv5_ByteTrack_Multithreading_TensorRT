@@ -2,7 +2,7 @@
 #define _YOLO_BYTE_API_H_
 #include <assert.h>
 #include <dirent.h>
-#include <io.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

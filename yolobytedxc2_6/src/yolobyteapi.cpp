@@ -65,11 +65,11 @@ void YoloByteAPI::drawResult(const cv::Mat &org_img, const vector<STrack> &outpu
 
 int YoloByteAPI::processVideo(const char *video_path, const char *output_dir, const char *output_file_name = "output.mp4", int skip_num = 1) {
     read_end = false, detect_end = false, track_end = false, res_end = false;
-    if (_access(video_path, 0) == -1) {
+    if (access(video_path, F_OK ) == -1) {
         cout << "video file not exist" << endl;
         return -1;
     }
-    if (_access(output_dir, 0) == -1) {
+    if (access(output_dir, F_OK) == -1) {
         cout << "output dir not exist" << endl;
         return -1;
     }
@@ -79,8 +79,8 @@ int YoloByteAPI::processVideo(const char *video_path, const char *output_dir, co
     cv::VideoCapture video_cap(video_path);
     int width = video_cap.get(cv::CAP_PROP_FRAME_WIDTH), height = video_cap.get(cv::CAP_PROP_FRAME_HEIGHT), fps = video_cap.get(CAP_PROP_FPS);
     ;
-    // VideoWriter videoWriter(output_dir+"output.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), double(fps)/double(1+skip_num), Size(width, height));
-    this->videoWriter.open(output_dir + output_file_name, VideoWriter::fourcc('m', 'p', '4', 'v'), double(fps) / double(1 + skip_num), Size(width, height));
+    // VideoWriter videoWriter(this->output_dir+"output.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), double(fps)/double(1+skip_num), Size(width, height));
+    this->videoWriter.open(this->output_dir + output_file_name, VideoWriter::fourcc('m', 'p', '4', 'v'), double(fps) / double(1 + skip_num), Size(width, height));
 
     cv::Mat src_img;
     while (video_cap.read(src_img)) {

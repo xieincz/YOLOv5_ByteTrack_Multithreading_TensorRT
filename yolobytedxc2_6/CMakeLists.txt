@@ -31,9 +31,11 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # cuda
 include_directories(/usr/local/cuda/include
 /home/TensorRT-7.2.2.3/include
+/usr/include/x86_64-linux-gnu
 )
 link_directories(/usr/local/cuda/lib64
 /home/TensorRT-7.2.2.3/lib
+/usr/lib/x86_64-linux-gnu
 )
 
 include_directories(
