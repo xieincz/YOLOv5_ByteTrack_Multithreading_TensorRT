@@ -20,7 +20,7 @@ def init():
 
 
 def process_video(handle=None, input_video=None, **kwargs):
-    output_dir='./output'
+    output_dir='./outputdir'
     output_file_name='output.mp4'
     #每获取1帧要跳过几帧
     skip_num=1
@@ -33,7 +33,7 @@ def process_video(handle=None, input_video=None, **kwargs):
 
 if __name__ == '__main__':
 
-    p = "./person_street.mp4"
+    p = "./testdata/person_street.mp4"
     
     import os
     assert os.path.exists(p)#整理代码的时候加的，还没有跑过，如果确定这个mp4存在可以注释本行
