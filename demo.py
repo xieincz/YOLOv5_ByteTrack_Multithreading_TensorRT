@@ -3,7 +3,7 @@ from yolobytedxc2_6 import yolobyteapi
 
 def init():
     # for yolo
-    yolo_engine_path = './cppmodels/yolov5l6.engine'
+    yolo_engine_path = './cppmodels/yolov5m6.engine'
     
     conf_thresh = 0.5
     nms_thresh = 0.52

@@ -5,7 +5,7 @@ model_dir=/project/ev_sdk/src/cppmodels/
 src_dir=/project/ev_sdk/src/
 #最后面的斜杠不能少
 
-model_type=l6
+model_type=m6
 #可以是 n6 s6 m6 l6 x6之一
 
 model_name=yolov5${model_type}
