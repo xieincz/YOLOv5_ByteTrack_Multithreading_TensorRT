@@ -7,7 +7,6 @@ Usage:
 """
 
 import argparse
-import contextlib
 import os
 import platform
 import sys
