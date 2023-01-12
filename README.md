@@ -1,7 +1,13 @@
 # YOLOv5_ByteTrack_Multithreading_TensorRT
- YOLOv5 和 ByteTrack 的多线程追踪实现, 使用 TensorRT 进行推理加速
+ Multi-thread tracking of YOLOv5 and ByteTrack implemented by C++, accelerated by TensorRT
 
+## Usage and demo
 
+Click the button shown below to try this project in colab.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/googlecolab/colabtools/blob/main/notebooks/colab-github-demo.ipynb)
+
+note: You can also upload the notebook in the colab folder of this project to the colab for running.
 
 ## Acknowledgement
 
