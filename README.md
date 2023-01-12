@@ -5,7 +5,7 @@
 
 Click the button shown below to try this project in colab.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/googlecolab/colabtools/blob/main/notebooks/colab-github-demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/xieincz/YOLOv5_ByteTrack_Multithreading_TensorRT/main/colab/YOLOv5_ByteTrack_Multithreading_TensorRT.ipynb)
 
 note: You can also upload the notebook in the colab folder of this project to the colab for running.
 
