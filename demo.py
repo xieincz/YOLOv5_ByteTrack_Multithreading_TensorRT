@@ -5,7 +5,7 @@ def init():
     # for yolo
     yolo_engine_path = '/content/YOLOv5_ByteTrack_Multithreading_TensorRT/cppmodels/yolov5m6.engine'
     
-    conf_thresh = 0.5
+    conf_thresh = 0.15
     nms_thresh = 0.52
 
     # for bytetrack
