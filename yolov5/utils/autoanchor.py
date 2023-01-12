@@ -2,15 +2,6 @@
 """
 AutoAnchor utils
 """
-
-import random
-
-import numpy as np
-import torch
-import yaml
-from tqdm import tqdm
-
-from utils import TryExcept
 from utils.general import LOGGER, colorstr
 
 PREFIX = colorstr('AutoAnchor: ')
