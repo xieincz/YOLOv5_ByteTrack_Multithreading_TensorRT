@@ -3,19 +3,11 @@
 Common modules
 """
 
-import ast
-import contextlib
-import json
 import math
-import platform
 import warnings
-import zipfile
-from collections import OrderedDict, namedtuple
 from copy import copy
 from pathlib import Path
-from urllib.parse import urlparse
 
-import cv2
 import numpy as np
 import pandas as pd
 import torch
@@ -24,9 +16,8 @@ from IPython.display import display
 from PIL import Image
 
 from utils import TryExcept
-from utils.general import (LOGGER, ROOT, check_requirements, check_suffix, check_version, colorstr,
-                           increment_path, is_notebook, xywh2xyxy,
-                           xyxy2xywh, yaml_load)
+from utils.general import (LOGGER, colorstr,
+                           increment_path, is_notebook, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 
 

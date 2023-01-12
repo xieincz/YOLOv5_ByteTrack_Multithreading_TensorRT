@@ -5,7 +5,6 @@ utils/initialization
 
 import contextlib
 import platform
-import threading
 
 
 def emojis(str=''):

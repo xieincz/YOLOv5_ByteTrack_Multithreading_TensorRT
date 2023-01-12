@@ -3,7 +3,6 @@
 General utils
 """
 
-import contextlib
 import glob
 import inspect
 import logging
@@ -12,16 +11,11 @@ import os
 import platform
 import shutil
 import sys
-import time
 import urllib
 from datetime import datetime
-from itertools import repeat
-from multiprocessing.pool import ThreadPool
 from pathlib import Path
 from subprocess import check_output
-from tarfile import is_tarfile
 from typing import Optional
-from zipfile import ZipFile, is_zipfile
 
 import IPython
 import cv2
@@ -29,11 +23,8 @@ import numpy as np
 import pandas as pd
 import pkg_resources as pkg
 import torch
-import torchvision
-import yaml
 
 from utils import TryExcept, emojis
-from utils.metrics import box_iou
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory
@@ -275,21 +266,6 @@ def check_font(font=FONT, progress=False):
         torch.hub.download_url_to_file(url, str(file), progress=progress)
 
 
-def yaml_load(file='data.yaml'):
-    # Single-line safe yaml loading
-    with open(file, errors='ignore') as f:
-        return yaml.safe_load(f)
-
-
-def unzip_file(file, path=None, exclude=('.DS_Store', '__MACOSX')):
-    # Unzip a *.zip file to path/, excluding files containing strings in exclude list
-    if path is None:
-        path = Path(file).parent  # default path
-    with ZipFile(file) as zipObj:
-        for f in zipObj.namelist():  # list all archived filenames in the zip
-            if all(x not in f for x in exclude):
-                zipObj.extract(f, path=path)
-
 def make_divisible(x, divisor):
     # Returns nearest x divisible by divisor
     if isinstance(divisor, torch.Tensor):
@@ -341,33 +317,6 @@ def xywh2xyxy(x):
     y[:, 2] = x[:, 0] + x[:, 2] / 2  # bottom right x
     y[:, 3] = x[:, 1] + x[:, 3] / 2  # bottom right y
     return y
-
-
-def segment2box(segment, width=640, height=640):
-    # Convert 1 segment label to 1 box label, applying inside-image constraint, i.e. (xy1, xy2, ...) to (xyxy)
-    x, y = segment.T  # segment xy
-    inside = (x >= 0) & (y >= 0) & (x <= width) & (y <= height)
-    x, y, = x[inside], y[inside]
-    return np.array([x.min(), y.min(), x.max(), y.max()]) if any(x) else np.zeros((1, 4))  # xyxy
-
-
-def segments2boxes(segments):
-    # Convert segment labels to box labels, i.e. (cls, xy1, xy2, ...) to (cls, xywh)
-    boxes = []
-    for s in segments:
-        x, y = s.T  # segment xy
-        boxes.append([x.min(), y.min(), x.max(), y.max()])  # cls, xyxy
-    return xyxy2xywh(np.array(boxes))  # cls, xywh
-
-
-def resample_segments(segments, n=1000):
-    # Up-sample an (n,2) segment
-    for i, s in enumerate(segments):
-        s = np.concatenate((s, s[0:1, :]), axis=0)
-        x = np.linspace(0, len(s) - 1, n)
-        xp = np.arange(len(s))
-        segments[i] = np.concatenate([np.interp(x, xp, s[:, i]) for i in range(2)]).reshape(2, -1).T  # segment xy
-    return segments
 
 
 def clip_boxes(boxes, shape):
